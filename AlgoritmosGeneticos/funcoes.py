@@ -15,6 +15,20 @@ def gene_cb():
 
     return gene
 
+def gene_cnb(x):
+    ''' Esta função gera um gene válido para o problema das caixas não-binárias.
+    
+    Args:
+        x: valor máximo para cada gene.
+
+    Return:
+        Um valor inteiro aleatório de 0 a x.
+    '''
+    valoresPossíveis = list(range(0, 101))
+    gene = random.choice(valoresPossíveis)
+
+    return gene
+
 def indivíduo_cb(n):
     ''' Esta função gera um indivíduo para o problema das caixas binárias.
     
@@ -31,18 +45,22 @@ def indivíduo_cb(n):
 
     return indivíduo
 
-def funçãoObjetivo_cb(indivíduo):
-    ''' Esta função computa a função objetivo no problema das caixas binárias.
+def indivíduo_cnb(n, x):
+    ''' Esta função gera um indivíduo para o problema das caixas não-binárias.
     
     Args:
-        indivíduo: lista contendo os n genes.
+        n: número de genes de cada indivíduo.
+        x: valor máximo para cada gene.
 
     Return:
-        A soma dos genes de um indivíduo.
+        Uma lista com n genes.
     '''
-    soma = sum(indivíduo) + 1
-    
-    return soma
+    indivíduo = []
+    for _ in range(n):
+        gene = gene_cnb(x)
+        indivíduo.append(gene)
+
+    return indivíduo
 
 def população_cb(tamanho, n):
     ''' Esta função cria uma população no problema das caixas binárias.
@@ -57,6 +75,24 @@ def população_cb(tamanho, n):
     população = []
     for _ in range(tamanho):
         indivíduo = indivíduo_cb(n)
+        população.append(indivíduo)
+
+    return população
+
+def população_cnb(tamanho, n, x):
+    ''' Esta função cria uma população no problema das caixas não-binárias.
+
+    Args:
+        tamanho: tamanho da população em indivíduos.
+        n: número de genes de um indivíduo.
+        x: valor máximo para cada gene.
+
+    Return:
+        Uma lista onde cada item é um indivíduo.
+    '''
+    população = []
+    for _ in range(tamanho):
+        indivíduo = indivíduo_cnb(n,x)
         população.append(indivíduo)
 
     return população
@@ -76,6 +112,19 @@ def seleçãoRoletaMax(população, fitness):
     população_selecionada = random.choices(população, weights = fitness, k = len(população))
 
     return população_selecionada
+
+def funçãoObjetivo_cb(indivíduo):
+    ''' Esta função computa a função objetivo no problema das caixas binárias.
+    
+    Args:
+        indivíduo: lista contendo os n genes.
+
+    Return:
+        A soma dos genes de um indivíduo.
+    '''
+    soma = sum(indivíduo) + 1
+    
+    return soma
 
 def funçãoObjetivoPopulação_cb(população):
     ''' Esta função calcula a função objetivo para todos os membros de uma população.
@@ -120,5 +169,20 @@ def mutação_cb(indivíduo):
     '''
     gene_mutado = random.randint(0, len(indivíduo)-1)
     indivíduo[gene_mutado] = gene_cb()
+
+    return indivíduo
+
+def mutação_cnb(indivíduo, x):
+    ''' Esta função realiza uma mutação de um gene no problema das caixas não-binárias.
+    
+    Args:
+        indivíduo: lista contendo os genes das caixas não-binárias.
+        x: valor máximo para cada gene.
+
+    Return:
+        Um indivíduo com o gene mutado.
+    '''
+    gene_mutado = random.randint(0, len(indivíduo)-1)
+    indivíduo[gene_mutado] = gene_cnb(x)
 
     return indivíduo
