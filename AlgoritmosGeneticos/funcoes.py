@@ -4,6 +4,7 @@ import random
 
 # Funções:
 
+# ---------------- DO PROBLEMA:
 def gene_cb():
     ''' Esta função gera um gene válido para o problema das caixas binárias.
     
@@ -24,8 +25,7 @@ def gene_cnb(x):
     Return:
         Um valor inteiro aleatório de 0 a x.
     '''
-    valoresPossíveis = list(range(0, 101))
-    gene = random.choice(valoresPossíveis)
+    gene = random.randint(0,x)
 
     return gene
 
@@ -97,22 +97,6 @@ def população_cnb(tamanho, n, x):
 
     return população
 
-def seleçãoRoletaMax(população, fitness):
-    ''' Esta função seleciona indivíduos de uma população utilizando o método da roleta.
-
-    Nota: apenas para problemas de maximização.
-
-    Args:
-        população: lista com todos os indivíduos da população.
-        fitness: lista com o valor da função objetivo para cada indivíduo da população.
-
-    Return:
-        População dos indivíduos selecionados.
-    '''
-    população_selecionada = random.choices(população, weights = fitness, k = len(população))
-
-    return população_selecionada
-
 def funçãoObjetivo_cb(indivíduo):
     ''' Esta função computa a função objetivo no problema das caixas binárias.
     
@@ -142,6 +126,26 @@ def funçãoObjetivoPopulação_cb(população):
 
     return fitness
 
+# ---------------- DE SELEÇÃO:
+
+def seleçãoRoletaMax(população, fitness):
+    ''' Esta função seleciona indivíduos de uma população utilizando o método da roleta.
+
+    Nota: apenas para problemas de maximização.
+
+    Args:
+        população: lista com todos os indivíduos da população.
+        fitness: lista com o valor da função objetivo para cada indivíduo da população.
+
+    Return:
+        População dos indivíduos selecionados.
+    '''
+    população_selecionada = random.choices(população, weights = fitness, k = len(população))
+
+    return população_selecionada
+
+# ---------------- DE CRUZAMENTO:
+
 def cruzamentoPontoSimples(pai, mãe):
     ''' Esta função representa o operador de cruzamento/crossover de ponto simples.
 
@@ -157,32 +161,3 @@ def cruzamentoPontoSimples(pai, mãe):
     filho2 = mãe[:ponto_de_corte] + pai[ponto_de_corte:]
 
     return filho1, filho2
-
-def mutação_cb(indivíduo):
-    ''' Esta função realiza uma mutação de um gene no problema das caixas binárias.
-    
-    Args:
-        indivíduo: lista contendo os genes das caixas binárias.
-
-    Return:
-        Um indivíduo com o gene mutado.
-    '''
-    gene_mutado = random.randint(0, len(indivíduo)-1)
-    indivíduo[gene_mutado] = gene_cb()
-
-    return indivíduo
-
-def mutação_cnb(indivíduo, x):
-    ''' Esta função realiza uma mutação de um gene no problema das caixas não-binárias.
-    
-    Args:
-        indivíduo: lista contendo os genes das caixas não-binárias.
-        x: valor máximo para cada gene.
-
-    Return:
-        Um indivíduo com o gene mutado.
-    '''
-    gene_mutado = random.randint(0, len(indivíduo)-1)
-    indivíduo[gene_mutado] = gene_cnb(x)
-
-    return indivíduo
