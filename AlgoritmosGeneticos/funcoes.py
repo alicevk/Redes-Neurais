@@ -42,7 +42,22 @@ def gene_letra(letras):
         Uma letra sorteada entre as possíveis.
     '''
     letra = random.choice(letras)
+
     return letra
+
+
+def gene_liga(elementos):
+    ''' Esta função sorteia um elemento entre os possíveis para o problema da liga ternária.
+
+    Args:
+        elementos: elementos possíveis de serem sorteados.
+
+    Return:
+        Um elemento aleatório sorteado entre os possíveis.    
+    '''
+    elemento = random.choice(elementos)
+
+    return elemento
 
 
 # ------------------------------- INDIVÍDUO:
@@ -92,11 +107,33 @@ def indivíduo_senha(n, letras):
     Return:
         Uma lista com  n letras.
     '''
-    candidato = []
+    indivíduo = []
     for _ in range(n):
-        candidato.append(gene_letra(letras))
+        gene = gene_letra(letras)
+        indivíduo.append(gene)
 
-    return candidato
+    return indivíduo
+
+
+def indivíduo_liga(elementos):
+    ''' Esta função gera um indivíduo com três elementos aleatórios em três quantidades
+    aleatórias para o problema da liga ternária mais cara.
+    
+    Args:
+        elementos: uma lista de elementos possíveis de serem sorteados.
+        
+    Return:
+        Um indivíduo com 3 elementos sorteados A, B e C e 3 quantidades x, y e z.
+    '''
+    indivíduo = []
+    x = 100
+    for _ in range(3):
+        elemento = gene_liga(elementos)
+        indivíduo.append(elemento)
+
+        proporção = random.randint(6,x)
+
+    return indivíduo
 
 
 # ------------------------------- POPULAÇÃO:
@@ -142,7 +179,7 @@ def população_senha(tamanho, n, letras):
     ''' Esta função cria uma população no problema da senha.
 
     Args:
-        tamanho: tamanho da população.
+        tamanho: tamanho da população em indivíduos.
         n: número representando o tamanho total da senha.
         letras: letras possíveis de serem sorteadas.
 
@@ -154,6 +191,18 @@ def população_senha(tamanho, n, letras):
         população.append(indivíduo_senha(n, letras))
     
     return população
+
+
+def população_elementos(tamanho, elementos):
+    ''' Esta função cria uma população de elementos no problema da liga ternária mais cara.
+
+    Args:
+        tamanho: tamanho da população em indivíduos.
+        elementos: lista de elementos possíveis de serem sorteados.
+
+    Returns:
+        Uma lista onde cada item é um indivíduo de elementos no problema da liga mais cara.
+    '''
 
 
 # ------------------------------- FUNÇÃO OBJETIVO:
