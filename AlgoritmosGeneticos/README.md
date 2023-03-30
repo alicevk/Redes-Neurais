@@ -1,5 +1,3 @@
 # Experimentos de otimização e algoritmos genéticos
 
-Coloque seus experimentos de algoritmos genéticos nesta pasta.
-
-Esceva um README aqui para guiar o leitor sobre seus experimentos realizados.
+Nesta pasta constam experimentos didáticos no formato de notebooks Jupyter. Os experimentos adicionados até o momento e uma breve descrição de cada um se encontra abaixo.
