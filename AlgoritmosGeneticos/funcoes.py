@@ -46,8 +46,9 @@ def gene_letra(letras):
     return letra
 
 
-def gene_liga(elementos):
-    ''' Esta função sorteia um elemento entre os possíveis para o problema da liga ternária.
+def gene_ligaElemento(elementos):
+    ''' Esta função sorteia um elemento entre os possíveis para o problema da liga
+    ternária.
 
     Args:
         elementos: elementos possíveis de serem sorteados.
@@ -58,6 +59,27 @@ def gene_liga(elementos):
     elemento = random.choice(elementos)
 
     return elemento
+
+
+def gene_ligaNúmero(x, y):
+    ''' Esta função sorteia um número para a proporção dos elementos no problema da liga
+    ternária.
+    
+    Args:
+        x: primeiro número já sorteado (caso haja algum).
+        y: segundo número já sorteado (caso haja algum).
+        
+    Return:
+        Um número aleatório possível para a proporção dos elementos que seja maior do que
+        5 e tal que x + y + z = 100.
+    '''
+    máximo = 91 - (x + y)
+    if (x!=0) and (y!=0):
+        número = máximo
+    else:
+        número = random.randint(6,91)
+
+    return número
 
 
 # ------------------------------- INDIVÍDUO:
@@ -125,13 +147,22 @@ def indivíduo_liga(elementos):
     Return:
         Um indivíduo com 3 elementos sorteados A, B e C e 3 quantidades x, y e z.
     '''
+    elementos_temp = elementos.copy()
     indivíduo = []
-    x = 100
+    x = 0
+    y = 0
     for _ in range(3):
-        elemento = gene_liga(elementos)
-        indivíduo.append(elemento)
+        número = gene_ligaNúmero(x,y)
+        
+        if x==0:
+            x = número
+        elif y==0:
+            y = número
 
-        proporção = random.randint(6,x)
+        elemento = gene_ligaElemento(elementos_temp)
+        elementos_temp.remove(elemento)
+
+        indivíduo.append([número, elemento])
 
     return indivíduo
 
@@ -188,21 +219,29 @@ def população_senha(tamanho, n, letras):
     '''
     população = []
     for _ in range(tamanho):
-        população.append(indivíduo_senha(n, letras))
+        indivíduo = indivíduo_senha(n, letras)
+        população.append(indivíduo)
     
     return população
 
 
-def população_elementos(tamanho, elementos):
-    ''' Esta função cria uma população de elementos no problema da liga ternária mais cara.
+def população_liga(tamanho, elementos):
+    ''' Esta função cria uma população de indivíduos no problema da liga ternária mais
+    cara.
 
     Args:
         tamanho: tamanho da população em indivíduos.
         elementos: lista de elementos possíveis de serem sorteados.
 
     Returns:
-        Uma lista onde cada item é um indivíduo de elementos no problema da liga mais cara.
+        Uma lista onde cada item é um indivíduo no problema da liga mais cara.
     '''
+    população = []
+    for _ in range(tamanho):
+        indivíduo = indivíduo_liga(elementos)
+        população.append(indivíduo)
+
+    return população
 
 
 # ------------------------------- FUNÇÃO OBJETIVO:
@@ -225,12 +264,12 @@ def funçãoObjetivo_senha(indivíduo, senha_verdadeira):
     '''Esta função computa a função objetivo de um indivíduo no problema da senha.
     
     Args:
-        insivíduo: lista contendo as letras da senha.
+        indivíduo: lista contendo as letras da senha.
         senha_verdadeira: a senha que você está tentando descobrir no problema.
 
     Returns:
-        A "distância" entre a senha proposta e a senha verdadeira. Essa distância é
-        medida letra por letra, e quanto mais distante uma letra for, maior o valor.
+        A "distância" entre a senha proposta e a senha verdadeira. Essa distância é medida
+        letra por letra, e quanto mais distante uma letra for, maior o valor.
     '''
     diferença = 0
 
@@ -238,6 +277,34 @@ def funçãoObjetivo_senha(indivíduo, senha_verdadeira):
         diferença = diferença + abs(ord(letra_candidato) - ord(letra_oficial))
 
     return diferença
+
+
+def funçãoObjetivo_ligaCara(indivíduo, preços_kg):
+    '''Esta função computa a função objetivo de um indivíduo no problema da liga ternária
+    mais cara.
+    
+    Args:
+        indivíduo: lista contendo três números e três elementos intercalados.
+        preços_kg: lista com todos os elementos possíveis e seus preços por kg.
+
+    Returns:
+        O preço total de um kilograma da liga escolhida.
+    '''
+    preço_total = 0
+    números = []
+    elementos = []
+
+    for i in range(3):
+        números.append(indivíduo[i][0])
+        elementos.append(indivíduo[i][1])
+
+    contador = 0
+
+    for número, elemento in zip(números, elementos):
+        preço_total += número * (preços_kg[elemento]/1000)
+        contador += 2
+
+    return preço_total
 
 
 # ------------------------------- FUNÇÃO OBJETIVO POPULAÇÃO:
@@ -252,6 +319,7 @@ def funçãoObjetivoPopulação_cb(população):
         Lista de valores representando a fitness de cada um dos indivíduos da população.
     '''
     fitness = []
+
     for indivíduo in população:
         fobj = funçãoObjetivo_cb(indivíduo)
         fitness.append(fobj)
@@ -273,6 +341,25 @@ def funçãoObjetivoPopulação_senha(população, senha_verdadeira):
 
     for indivíduo in população:
         fobj = funçãoObjetivo_senha(indivíduo, senha_verdadeira)
+        fitness.append(fobj)
+
+    return fitness
+
+
+def funçãoObjetivoPopulação_ligaCara(população, preços_kg):
+    ''' Esta função computa a função objetivo para todos os membros de uma população.
+
+    Args:
+        população: lista com todos os indivíduos da população.
+        preços_kg: lista com todos os elementos possíveis e seus preços por kg.
+
+    Returns:
+        Uma lista contendo os preços totais de cada indivíduo.
+    '''
+    fitness = []
+
+    for indivíduo in população:
+        fobj = funçãoObjetivo_ligaCara(indivíduo, preços_kg)
         fitness.append(fobj)
 
     return fitness
@@ -392,5 +479,23 @@ def mutação_senha(indivíduo, letras):
     '''
     gene_mutado = random.randint(0, len(indivíduo)-1)
     indivíduo[gene_mutado] = gene_letra(letras)
+
+    return indivíduo
+
+
+def mutação_liga(indivíduo, elementos):
+    ''' Esta função realiza a mutação de um dos elementos do gene no problema da liga
+    mais cara.
+
+    Args:
+        indivíduo: uma lista representando um indivíduo no problema da liga mais cara.
+        elementos: uma lista com todos os elementos possíveis.
+
+    Return:
+        Um indivíduo com apenas o elemento de um gene ([número, elemento]) mutado.
+    '''
+    gene_mutado = random.randint(0, len(indivíduo)-1)
+    número = indivíduo[gene_mutado][0]
+    indivíduo[gene_mutado] = [número,gene_ligaElemento(elementos)]
 
     return indivíduo
