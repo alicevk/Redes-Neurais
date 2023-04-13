@@ -41,6 +41,30 @@ def criaCidades(n):
 
     return cidades
 
+def computaMochila(indivíduo, objetos, ordem_dos_nomes):
+    ''' Esta função computa o valor total e peso total de uma mochila.
+    
+    Args:
+        indivíduos: lista binária contendo a informação de quais objetos serão selecionados.
+        objetos: Dicionário onde as chaves são os nomes dos objetos e os valores são
+    dicionários com a informação do peso e valor.
+        ordem_dos_nomes: lista contendo a ordem dos nomes dos objetos.
+
+    Returns:
+        valor_total: valor total dos itens da mochila em unidades de dinheiros.
+        peso_total: peso total dos itens da mochila em unidades de massa.
+        '''
+    valor_total = 0
+    peso_total = 0
+    for pegou_o_item_ou_não, nome_do_item in zip(indivíduo, ordem_dos_nomes):
+        if pegou_o_item_ou_não == 1:
+            valor_do_item = objetos[nome_do_item]["valor"]
+            peso_do_item = objetos[nome_do_item]["peso"]
+            valor_total += valor_do_item
+            peso_total += peso_do_item
+
+    return valor_total, peso_total
+
 
 # ------------------------------- GENE:
 
@@ -411,6 +435,26 @@ def funçãoObjetivo_cv(indivíduo, cidades):
 
     return distância
 
+def funçãoObjetivo_mochila(indivíduo, objetos, limite, ordem_dos_nomes):
+    ''' Esta função computa a função objetivo de um candidato no problema da mochila.
+    
+    Args:
+        indivíduo: lista binária contendo a informação de quais objetos serão selecionados.
+        objetos: dicionário onde as chaves são os nomes dos objetos e os valores são
+    dicionários com a informação do peso e valor.
+        limite: número indicando o limite de peso que a mochila aguenta.
+        ordem_dos_nomes: lista contendo a ordem dos nomes dos objetos.
+
+    Returns:
+        Valor total dos itens inseridos na mochila considerando a penalidade paraquando o
+    peso excede o limite.
+    '''
+    valor_mochila, peso_mochila = computaMochila(indivíduo, objetos, ordem_dos_nomes)
+    if peso_mochila > limite:
+        return 0.01
+    else:
+        return valor_mochila
+    
 
 # ------------------------------- FUNÇÃO OBJETIVO POPULAÇÃO:
 
@@ -486,6 +530,27 @@ def funçãoObjetivoPopulação_cv(população, cidades):
     resultado = []
     for indivíduo in população:
         resultado.append(funçãoObjetivo_cv(indivíduo, cidades))
+
+    return resultado
+
+
+def funçãoObjetivoPopulação_mochila(população, objetos, limite, ordem_dos_nomes):
+    ''' Esta função computa a função objetivo de uma população no problema da mochila.
+
+    Args:
+        população: lista com todos os indivíduos da população
+        objetos: dicionário onde as chaves são os nomes dos objetos e os valores são
+    dicionários com a informação do peso e valor.
+        limite: número indicando o limite de peso que a mochila aguenta.
+        ordem_dos_nomes: lista contendo a ordem dos nomes dos objetos.
+    
+    Returns:
+        Lista contendo a distância percorrida pelo caixeiro para todos os indivíduos da
+    população.
+    '''
+    resultado = []
+    for indivíduo in população:
+        resultado.append(funçãoObjetivo_mochila(indivíduo, objetos, limite, ordem_dos_nomes))
 
     return resultado
 
