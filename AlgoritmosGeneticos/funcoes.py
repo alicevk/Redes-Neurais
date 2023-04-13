@@ -4,6 +4,44 @@ import random
 
 # Funções:
 
+# ------------------------------- SUPORTE:
+
+def distânciaDoisPontos(a, b):
+    ''' Esta função computa a distância Euclidiana entre dois pontos em R^2.
+
+    Args:
+        a: lista contendo as coordenadas x e y de um ponto.
+        b: lista contendo as coordenadas x e y de um ponto.
+
+    Returns:
+        Distância entre as coordenadas dos pontos `a` e `b`.
+    '''
+    x1 = a[0]
+    x2 = b[0]
+    y1 = a[1]
+    y2 = b[1]
+    dist = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** (1 / 2)
+
+    return dist
+
+
+def criaCidades(n):
+    ''' Esta função cria um dicionário aleatório de cidades com suas posições (x,y).
+
+    Args:
+        n: número de cidades que serão visitadas pelo caixeiro.
+
+    Return:
+        Dicionário contendo o nome das cidades como chaves e a coordenada no plano
+        cartesiano das cidades como valores.
+    '''
+    cidades = {}
+    for i in range(n):
+        cidades[f"Cidade {i}"] = (random.random(), random.random())
+
+    return cidades
+
+
 # ------------------------------- GENE:
 
 def gene_cb():
@@ -167,6 +205,23 @@ def indivíduo_liga(elementos):
     return indivíduo
 
 
+def indivíduo_cv(cidades):
+    ''' Esta função sorteia um caminho possível no problema do caixeiro viajante.
+
+    Args:
+        cidades: dicionário onde as chaves são os nomes das cidades e os valores são as
+    coordenadas das cidades.
+
+    Return:
+        Retorna uma lista de nomes de cidades formando um caminho onde visitamos cada
+    cidade apenas uma vez.
+    '''
+    nomes = list(cidades.keys())
+    random.shuffle(nomes)
+
+    return nomes
+
+
 # ------------------------------- POPULAÇÃO:
 
 def população_cb(tamanho, n):
@@ -244,6 +299,24 @@ def população_liga(tamanho, elementos):
     return população
 
 
+def população_cv(tamanho, cidades):
+    ''' Esta função cria a população inicial no problema do caixeiro viajante.
+
+    Args:
+        tamanho: tamanho da população.
+        cidades: dicionário onde as chaves são os nomes das cidades e os valores são as
+    coordenadas das cidades.
+
+    Returns:
+        Lista com todos os indivíduos da população no problema do caixeiro viajante.
+    '''
+    população = []
+    for _ in range(tamanho):
+        população.append(indivíduo_cv(cidades))
+
+    return população
+
+
 # ------------------------------- FUNÇÃO OBJETIVO:
 
 def funçãoObjetivo_cb(indivíduo):
@@ -307,6 +380,38 @@ def funçãoObjetivo_ligaCara(indivíduo, preços_kg):
     return preço_total
 
 
+def funçãoObjetivo_cv(indivíduo, cidades):
+    ''' Esta função computa a função objetivo de um indivíduo no problema do caixeiro
+    viajante.
+
+    Args:
+        indivídiuo: lista contendo a ordem das cidades que serão visitadas
+        cidades: dicionário onde as chaves são os nomes das cidades e os valores são as
+    coordenadas das cidades.
+
+    Returns:
+        A distância percorrida pelo caixeiro seguindo o caminho contido no
+    `individuo`. Lembrando que após percorrer todas as cidades em ordem, o
+    caixeiro retorna para a cidade original de onde começou sua viagem.
+    '''
+    distância = 0
+    for posição in range(len(indivíduo)-1):
+        partida = cidades[indivíduo[posição]]
+        chegada = cidades[indivíduo[posição+1]]
+
+        percurso = distânciaDoisPontos(partida, chegada)
+        distância += percurso
+    
+    # caminho de volta pra cidade inicial!
+    partida = cidades[indivíduo[-1]]
+    chegada = cidades[indivíduo[0]]
+
+    percurso = distânciaDoisPontos(partida, chegada)
+    distância += percurso
+
+    return distância
+
+
 # ------------------------------- FUNÇÃO OBJETIVO POPULAÇÃO:
 
 def funçãoObjetivoPopulação_cb(população):
@@ -363,6 +468,26 @@ def funçãoObjetivoPopulação_ligaCara(população, preços_kg):
         fitness.append(fobj)
 
     return fitness
+
+
+def funçãoObjetivoPopulação_cv(população, cidades):
+    ''' Esta função computa a função objetivo de uma população no problema do caixeiro
+    viajante.
+
+    Args:
+        população: lista com todos os inviduos da população
+        cidades: dicionário onde as chaves são os nomes das cidades e os valores são as
+    coordenadas das cidades.
+    
+    Returns:
+        Lista contendo a distância percorrida pelo caixeiro para todos os indivíduos da
+    população.
+    '''
+    resultado = []
+    for indivíduo in população:
+        resultado.append(funçãoObjetivo_cv(indivíduo, cidades))
+
+    return resultado
 
 
 # ------------------------------- SELEÇÃO:
@@ -437,6 +562,34 @@ def cruzamentoPontoSimples(pai, mãe):
     return filho1, filho2
 
 
+def cruzamentoOrdenado(pai, mãe):
+    ''' Esta função representa o operador de cruzamento ordenado.
+
+    Args:
+        pai: um indivíduo qualquer selecionado como progenitor.
+        mãe: outro indivíduo qualquer selecionado como progenitor.
+
+    Returns:
+        Duas listas, sendo que cada uma representa um filho dos pais que foram os
+    argumentos. Estas listas mantém os genes originais dos pais, porém altera a ordem
+    deles.
+    '''
+    corte1 = random.randint(0, len(mãe) - 2)
+    corte2 = random.randint(corte1 + 1, len(mãe)-1)
+
+    filho1 = pai[corte1:corte2]
+    for gene in mãe:
+        if gene not in filho1:
+            filho1.append(gene)
+
+    filho2 = mãe[corte1:corte2]
+    for gene in pai:
+        if gene not in filho2:
+            filho2.append(gene)
+
+    return filho1, filho2
+
+
 # ------------------------------- MUTAÇÃO:
 
 def mutação_cb(indivíduo):
@@ -494,8 +647,31 @@ def mutação_liga(indivíduo, elementos):
     Return:
         Um indivíduo com apenas o elemento de um gene ([número, elemento]) mutado.
     '''
+    elementos_temp = elementos.copy()
+
+    for elemento in indivíduo:
+        if elemento in elementos_temp:
+            elementos_temp.remove(elemento)
+            
     gene_mutado = random.randint(0, len(indivíduo)-1)
     número = indivíduo[gene_mutado][0]
-    indivíduo[gene_mutado] = [número,gene_ligaElemento(elementos)]
+    indivíduo[gene_mutado] = [número,gene_ligaElemento(elementos_temp)]
+
+    return indivíduo
+
+
+def mutaçãoDeTroca(indivíduo):
+    ''' Esta função realiza a mutação de troca, trocando o valor de dois genes.
+
+    Args:
+        indivíduo: uma lista representado um indivíduo.
+
+    Return:
+        O indivíduo recebido como argumento, porém com dois dos seus genes
+    trocados de posição.
+    '''
+    índices = list(range(len(indivíduo)))
+    índice1, índice2 = random.sample(índices, k=2)
+    indivíduo[índice1], indivíduo[índice2] = indivíduo[índice2], indivíduo[índice1]
 
     return indivíduo
