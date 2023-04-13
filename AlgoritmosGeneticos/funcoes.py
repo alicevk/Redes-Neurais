@@ -66,6 +66,52 @@ def computaMochila(indivíduo, objetos, ordem_dos_nomes):
     return valor_total, peso_total
 
 
+def computaLiga(indivíduo, elementos, ordem_dos_nomes):
+    ''' Esta função computa o preço total e a massa total de uma liga.
+    
+    Args:
+        indivíduo: lista binária contendo a informação de quais elementos serão selecionados.
+        elementos: Dicionário onde as chaves são os nomes dos elementos e os valores são
+    informações de valor em dólares por kilograma.
+        ordem_dos_nomes: lista contendo a ordem dos nomes dos elementos.
+
+    Returns:
+        preço_total: preço total dos elementos da liga em dólares.
+        massa_total: massa total dos elementos da liga em gramas.
+        '''
+    preço_total = 0
+    massa_total = 0
+    for gramas_do_elemento, elemento in zip(indivíduo, ordem_dos_nomes):
+        if gramas_do_elemento != 0:
+            preço_do_elemento = elementos[elemento]/1000 # preço do item agora em gramas
+            massa_do_elemento = gramas_do_elemento
+            preço_total += preço_do_elemento * gramas_do_elemento # preço das gramas do elemento em questão
+            massa_total += massa_do_elemento
+
+    return preço_total, massa_total
+
+
+def qualÉALiga(indivíduo, ordem_dos_nomes):
+    ''' Esta função identifica quais são os elementos em um determinado indivíduo para
+    facilitar a visualização da solução no problema da liga ternária.
+    
+    Args:
+        indivíduo: lista binária contendo a informação de quais elementos serão selecionados.
+        
+    Returns:
+        String contendo o nome dos três elementos da liga.'''
+    liga = []
+    quantidades = []
+    for quantidade in indivíduo:
+        if quantidade != 0:
+            index = indivíduo.index(quantidade)
+            liga.append(ordem_dos_nomes[index])
+            quantidades.append(quantidade)
+    ligaString = f"{quantidades[0]}g de {liga[0]}, {quantidades[1]}g de {liga[1]} e {quantidades[2]}g de {liga[2]}."
+
+    return ligaString
+
+
 # ------------------------------- GENE:
 
 def gene_cb():
@@ -108,40 +154,18 @@ def gene_letra(letras):
     return letra
 
 
-def gene_ligaElemento(elementos):
-    ''' Esta função sorteia um elemento entre os possíveis para o problema da liga
-    ternária.
-
-    Args:
-        elementos: elementos possíveis de serem sorteados.
-
-    Return:
-        Um elemento aleatório sorteado entre os possíveis.    
-    '''
-    elemento = random.choice(elementos)
-
-    return elemento
-
-
-def gene_ligaNúmero(x, y):
-    ''' Esta função sorteia um número para a proporção dos elementos no problema da liga
-    ternária.
+def gene_liga(x):
+    ''' Esta função gera um gene válido para o problema das ligas ternárias.
     
     Args:
-        x: primeiro número já sorteado (caso haja algum).
-        y: segundo número já sorteado (caso haja algum).
-        
-    Return:
-        Um número aleatório possível para a proporção dos elementos que seja maior do que
-        5 e tal que x + y + z = 100.
-    '''
-    máximo = 91 - (x + y)
-    if (x!=0) and (y!=0):
-        número = máximo
-    else:
-        número = random.randint(6,91)
+        x: valor máximo para cada gene.
 
-    return número
+    Return:
+        Um valor inteiro aleatório de 5 a x.
+    '''
+    gene = random.randint(5,x)
+
+    return gene
 
 
 # ------------------------------- INDIVÍDUO:
@@ -199,32 +223,22 @@ def indivíduo_senha(n, letras):
     return indivíduo
 
 
-def indivíduo_liga(elementos):
-    ''' Esta função gera um indivíduo com três elementos aleatórios em três quantidades
-    aleatórias para o problema da liga ternária mais cara.
+def indivíduo_liga():
+    ''' Esta função gera um indivíduo com três números aleatórios de quantidades em uma
+    lista na qual cada posição representa um elemento para o problema da liga ternária
+    mais cara.
     
-    Args:
-        elementos: uma lista de elementos possíveis de serem sorteados.
-        
     Return:
-        Um indivíduo com 3 elementos sorteados A, B e C e 3 quantidades x, y e z.
+        Um indivíduo com 3 números sorteados em posições aleatórias.
     '''
-    elementos_temp = elementos.copy()
-    indivíduo = []
-    x = 0
-    y = 0
-    for _ in range(3):
-        número = gene_ligaNúmero(x,y)
-        
-        if x==0:
-            x = número
-        elif y==0:
-            y = número
-
-        elemento = gene_ligaElemento(elementos_temp)
-        elementos_temp.remove(elemento)
-
-        indivíduo.append([número, elemento])
+    indivíduo = [0] * 89 # 92 elementos - 3 genes a serem colocados = 89 zeros
+    max = 90 # 100kg no total - 2 * 5kg no mínimo a serem sorteadas = 90kg max
+    for _ in range(2):
+        gene = gene_liga(max)
+        indivíduo.append(gene)
+        max = 100 - gene
+    indivíduo.append(max) # o terceiro valor deve ser igual a 100 - os outros dois valores
+    random.shuffle(indivíduo) # define as posições (os elementos) de cada quantidade
 
     return indivíduo
 
@@ -304,7 +318,7 @@ def população_senha(tamanho, n, letras):
     return população
 
 
-def população_liga(tamanho, elementos):
+def população_liga(tamanho):
     ''' Esta função cria uma população de indivíduos no problema da liga ternária mais
     cara.
 
@@ -317,7 +331,7 @@ def população_liga(tamanho, elementos):
     '''
     população = []
     for _ in range(tamanho):
-        indivíduo = indivíduo_liga(elementos)
+        indivíduo = indivíduo_liga()
         população.append(indivíduo)
 
     return população
@@ -376,32 +390,24 @@ def funçãoObjetivo_senha(indivíduo, senha_verdadeira):
     return diferença
 
 
-def funçãoObjetivo_ligaCara(indivíduo, preços_kg):
+def funçãoObjetivo_ligaCara(indivíduo, elementos, ordem_dos_nomes):
     '''Esta função computa a função objetivo de um indivíduo no problema da liga ternária
     mais cara.
     
     Args:
         indivíduo: lista contendo três números e três elementos intercalados.
-        preços_kg: lista com todos os elementos possíveis e seus preços por kg.
+        elementos: lista com todos os elementos possíveis e seus preços por kg.
+        ordem_dos_nomes: lista contendo a ordem dos nomes dos elementos.
 
     Returns:
         O preço total de um kilograma da liga escolhida.
     '''
-    preço_total = 0
-    números = []
-    elementos = []
-
-    for i in range(3):
-        números.append(indivíduo[i][0])
-        elementos.append(indivíduo[i][1])
-
-    contador = 0
-
-    for número, elemento in zip(números, elementos):
-        preço_total += número * (preços_kg[elemento]/1000)
-        contador += 2
-
-    return preço_total
+    preço_total, massa_total = computaLiga(indivíduo, elementos, ordem_dos_nomes)
+    quantos_elementos = sum(1 for elemento in indivíduo if elemento != 0)
+    if massa_total != 100 or quantos_elementos != 3:
+        return 0.01
+    else:
+        return preço_total
 
 
 def funçãoObjetivo_cv(indivíduo, cidades):
@@ -495,7 +501,7 @@ def funçãoObjetivoPopulação_senha(população, senha_verdadeira):
     return fitness
 
 
-def funçãoObjetivoPopulação_ligaCara(população, preços_kg):
+def funçãoObjetivoPopulação_ligaCara(população, elementos, ordem_dos_nomes):
     ''' Esta função computa a função objetivo para todos os membros de uma população.
 
     Args:
@@ -508,7 +514,7 @@ def funçãoObjetivoPopulação_ligaCara(população, preços_kg):
     fitness = []
 
     for indivíduo in população:
-        fobj = funçãoObjetivo_ligaCara(indivíduo, preços_kg)
+        fobj = funçãoObjetivo_ligaCara(indivíduo, elementos, ordem_dos_nomes)
         fitness.append(fobj)
 
     return fitness
@@ -697,30 +703,6 @@ def mutação_senha(indivíduo, letras):
     '''
     gene_mutado = random.randint(0, len(indivíduo)-1)
     indivíduo[gene_mutado] = gene_letra(letras)
-
-    return indivíduo
-
-
-def mutação_liga(indivíduo, elementos):
-    ''' Esta função realiza a mutação de um dos elementos do gene no problema da liga
-    mais cara.
-
-    Args:
-        indivíduo: uma lista representando um indivíduo no problema da liga mais cara.
-        elementos: uma lista com todos os elementos possíveis.
-
-    Return:
-        Um indivíduo com apenas o elemento de um gene ([número, elemento]) mutado.
-    '''
-    elementos_temp = elementos.copy()
-
-    for elemento in indivíduo:
-        if elemento in elementos_temp:
-            elementos_temp.remove(elemento)
-            
-    gene_mutado = random.randint(0, len(indivíduo)-1)
-    número = indivíduo[gene_mutado][0]
-    indivíduo[gene_mutado] = [número,gene_ligaElemento(elementos_temp)]
 
     return indivíduo
 
