@@ -112,5 +112,5 @@ indivíduo_liga();
 população_liga();
 funçãoObjetivo_ligaCara();
 funçãoObjetivoPopulação_ligaCara();
-qualÉALiga();
+qualÉALiga()
 ```
