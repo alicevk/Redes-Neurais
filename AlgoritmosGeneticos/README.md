@@ -80,7 +80,7 @@ população_cv();
 funçãoObjetivo_cv();
 funçãoObjetivoPopulação_cv();
 cruzamentoOrdenado();
-mutaçãoDeTroca();
+mutaçãoDeTroca()
 ```
 
 <br>
@@ -92,7 +92,7 @@ mutaçãoDeTroca();
 ```
 computaMochila();
 funçãoObjetivo_mochila();
-funçãoObjetivoPopulação_mochila();
+funçãoObjetivoPopulação_mochila()
 ```
 
 <hr>
