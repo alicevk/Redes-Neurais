@@ -95,12 +95,6 @@ funçãoObjetivo_mochila();
 funçãoObjetivoPopulação_mochila()
 ```
 
-<br>
-
-* __Experimento A.08__ - _Usando o módulo DEAP_:
-  * Introdução ao módulo DEAP;
-  * Resolução do problema das caixas binárias com o DEAP.
-
 <hr>
 
 ## Experimentos individuais realizados fora de sala:

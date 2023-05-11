@@ -614,6 +614,40 @@ def seleçãoTorneioMin(população, fitness, tamanho_torneio = 3):
     return selecionados
 
 
+def seleçãoTorneioMax(população, fitness, tamanho_torneio = 3):
+    '''Esta função seleciona indivíduos de uma população por meio de torneio.
+    
+    Nota: implementada apenas para problemas de maximização.
+
+    Args:
+        população: lista com todos os indivíduos da população.
+        fitness: lista com o valor da função objetivo para cada indivíduo.
+        tamanho_torneio: quantidade de indivíduos que batalham entre si.
+
+    Return:
+        População de indivíduos selecionados; do mesmo tamanho do argumento 'população'.
+    '''
+    selecionados = []
+
+    # associando cada indivíduo com seu valor de fitness:
+    par_população_fitness = list(zip(população, fitness))
+
+    # fazendo os torneios:
+    for _ in range(len(população)):
+        combatentes = random.sample(par_população_fitness, tamanho_torneio)
+        máximo_fitness = float("-inf")
+
+        for par_indivíduo_fitness in combatentes:
+            indivíduo = par_indivíduo_fitness[0]
+            fit = par_indivíduo_fitness[1]
+            if fit > máximo_fitness:
+                selecionado = indivíduo
+                máximo_fitness = fit
+        selecionados.append(selecionado)
+
+    return selecionados
+
+
 # ------------------------------- CRUZAMENTO:
 
 def cruzamentoPontoSimples(pai, mãe):
