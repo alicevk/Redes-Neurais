@@ -114,3 +114,13 @@ funçãoObjetivo_ligaCara();
 funçãoObjetivoPopulação_ligaCara();
 qualÉALiga()
 ```
+
+<br>
+
+* __Experimento GA.03__ - _O caixeiro com gasolina infinita (e sem consciência ambiental)_:
+  * Introdução ao problema do caixeiro viajante "reverso";
+  * Resolução com um algoritmo genético.
+  * Funções introduzidas em [funcoes.py](funcoes.py):
+```
+seleçãoTorneioMax();
+```
