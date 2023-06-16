@@ -9,7 +9,8 @@ Nesta pasta constam experimentos didáticos no formato de notebooks Jupyter. Os 
 <br>
 
 * __Experimento R.01__ - _Derivadas_:
-  * 
+  * Relembrando o conceito de derivadas.
+
 
 <br>
 
@@ -35,4 +36,64 @@ __mul__
  * Funções introduzidas em [funcoes.py](funcoes.py):
 ```
 plota_grafo()
+```
+
+<br>
+
+* __Experimento R.04__ - _Computando os gradientes locais automaticamente_:
+  * Complementação da classe `Valor` com a implementação de uma função que calcula e propaga os gradientes locais automaticamente.
+
+
+<br>
+
+
+* __Experimento R.05__ - _Finalizando a classe Valor_:
+  * Adição de vários métodos à classe `Valor`;
+  * Finalização da classe `Valor`;
+  * Métodos do Python introduzidos:
+```
+__radd__
+__rmul__
+__truediv__
+__pow__
+__neg__
+__sub__
+__rsub__
+```
+
+<br>
+
+* __Experimento R.06__ - _Redes neurais artificiais_:
+  * Construção da nossa primeira rede MPL (Multilayer Perceptron);
+  * Plotagem do grafo da RNA.
+
+
+ <br>
+
+
+* __Experimento R.07__ - _Treinando uma rede neural_:
+  * Introdução à função de perda (_loss function_);
+  * Treinamento da rede pela atualização dos parâmetros;
+  * Implementação da descida do gradiente em um loop de épocas.
+
+
+<br>
+
+* __Experimento R.08__ - _Treinando uma rede neural usando pytorch_:
+  * Apresentação ao método prático de construir RNAs a partir do módulo *PyTorch*.
+  * Métodos, classes e módulos do PyTorch introduzidos:
+```
+tensor
+nn.Module
+nn.Sequential
+forward
+nn.Sequential
+nn.Linear
+nn.ReLU
+nn.MSELoss
+optim.Adam
+inverse_transform
+train
+eval
+no_grad
 ```
